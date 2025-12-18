@@ -71,5 +71,5 @@ export const generateReferralCode = (username: string): string => {
 };
 
 export const generateReferralLink = (referralCode: string): string => {
-  return `https://supercash1.site/register?ref=${referralCode}`;
+  return `https://www.supercash1.site/register?ref=${referralCode}`;
 };
