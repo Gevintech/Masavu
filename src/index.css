@@ -1,0 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 180 25% 15%;
+    --foreground: 180 10% 95%;
+
+    --card: 180 20% 18%;
+    --card-foreground: 180 10% 95%;
+
+    --popover: 180 20% 18%;
+    --popover-foreground: 180 10% 95%;
+
+    --primary: 168 80% 45%;
+    --primary-foreground: 180 25% 10%;
+
+    --secondary: 180 15% 25%;
+    --secondary-foreground: 180 10% 95%;
+
+    --muted: 180 15% 22%;
+    --muted-foreground: 180 10% 65%;
+
+    --accent: 45 100% 55%;
+    --accent-foreground: 180 25% 10%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 76% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    --border: 180 15% 28%;
+    --input: 180 15% 25%;
+    --ring: 168 80% 45%;
+
+    --radius: 0.75rem;
+
+    --youtube: 0 100% 50%;
+    --tiktok: 330 100% 50%;
+    --quiz: 262 83% 58%;
+    --daily: 142 76% 45%;
+    --aviator: 38 92% 50%;
+    --loan: 199 89% 48%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-family: 'Poppins', sans-serif;
+  }
+}
+
+@layer utilities {
+  .gradient-primary {
+    background: linear-gradient(135deg, hsl(168 80% 45%) 0%, hsl(180 60% 35%) 100%);
+  }
+  
+  .gradient-gold {
+    background: linear-gradient(135deg, hsl(45 100% 55%) 0%, hsl(38 92% 50%) 100%);
+  }
+  
+  .card-glow {
+    box-shadow: 0 0 20px hsl(168 80% 45% / 0.2);
+  }
+}
