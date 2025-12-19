@@ -32,7 +32,11 @@ const EarnMath = () => {
       fetchTasks();
       cooldown.refresh().catch((e) => {
         console.error(e);
-        toast({ title: 'Unable to load completed tasks', variant: 'destructive' });
+        toast({
+          title: 'Unable to load completed tasks',
+          description: (e as any)?.message ?? String(e),
+          variant: 'destructive',
+        });
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -91,18 +95,20 @@ const EarnMath = () => {
       }
 
       // Mark task as completed
-      await supabase.from('completed_tasks').insert({
+      const { error: insertError } = await supabase.from('completed_tasks').insert({
         user_id: user.id,
         task_id: task.id,
         task_type: 'math',
         completed_at: new Date().toISOString(),
       });
+      if (insertError) throw insertError;
 
       // Update wallet
-      await supabase
+      const { error: walletError } = await supabase
         .from('profiles')
-        .update({ wallet_math: profile.wallet_math + task.reward })
+        .update({ wallet_math: (profile.wallet_math ?? 0) + task.reward })
         .eq('id', user.id);
+      if (walletError) throw walletError;
 
       toast({ title: `Correct! +${task.reward} UGX earned!` });
       setAnswers({ ...answers, [task.id]: '' });
@@ -110,7 +116,11 @@ const EarnMath = () => {
       refreshProfile();
     } catch (error) {
       console.error(error);
-      toast({ title: 'Failed to submit answer', variant: 'destructive' });
+      toast({
+        title: 'Failed to submit answer',
+        description: (error as any)?.message ?? String(error),
+        variant: 'destructive',
+      });
     } finally {
       setSubmitting(null);
     }

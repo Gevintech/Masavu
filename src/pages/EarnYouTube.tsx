@@ -30,6 +30,7 @@ const EarnYouTube = () => {
         console.error(e);
         toast({
           title: 'Unable to load completed tasks',
+          description: (e as any)?.message ?? String(e),
           variant: 'destructive',
         });
       }),
@@ -75,24 +76,30 @@ const EarnYouTube = () => {
         return;
       }
 
-      await supabase.from('completed_tasks').insert({
+      const { error: insertError } = await supabase.from('completed_tasks').insert({
         user_id: user.id,
         task_id: task.id,
         task_type: 'youtube',
         completed_at: new Date().toISOString(),
       });
+      if (insertError) throw insertError;
 
-      await supabase
+      const { error: walletError } = await supabase
         .from('profiles')
-        .update({ wallet_youtube: profile.wallet_youtube + task.reward })
+        .update({ wallet_youtube: (profile.wallet_youtube ?? 0) + task.reward })
         .eq('id', user.id);
+      if (walletError) throw walletError;
 
       await cooldown.refresh();
       await refreshProfile();
       toast({ title: `+${task.reward} UGX earned!` });
     } catch (error) {
       console.error(error);
-      toast({ title: 'Failed to complete task', variant: 'destructive' });
+      toast({
+        title: 'Failed to complete task',
+        description: (error as any)?.message ?? String(error),
+        variant: 'destructive',
+      });
     }
   };
 
