@@ -67,8 +67,8 @@ const Referrals = () => {
   const shareReferralLink = () => {
     if (navigator.share) {
       navigator.share({
-        title: 'Join Supercash',
-        text: `Join Supercash and start earning money daily! Use my referral code: ${profile.referral_code}`,
+        title: 'Join Smart Cash',
+        text: `Join Smart Cash and start earning money daily! Use my referral code: ${profile.referral_code}`,
         url: profile.referral_link,
       });
     } else {
@@ -151,7 +151,7 @@ const Referrals = () => {
             <Step number={1} text="Share your referral link with friends" />
             <Step number={2} text="They sign up using your link" />
             <Step number={3} text="They activate their account (pay 5,000 UGX)" />
-            <Step number={4} text="You earn 2,500 UGX instantly!" />
+            <Step number={4} text="You earn 2,000 UGX instantly!" />
           </div>
         </div>
       </div>

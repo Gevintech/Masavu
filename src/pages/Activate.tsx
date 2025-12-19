@@ -31,7 +31,7 @@ const Activate = () => {
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-md mx-auto">
-        <h1 className="text-2xl font-bold text-center mb-2">💰 Supercash</h1>
+        <h1 className="text-2xl font-bold text-center mb-2">💰 Smart Cash</h1>
         <p className="text-center text-muted-foreground mb-6">Activate Your Account</p>
 
         <div className="bg-card rounded-xl p-6 mb-6">
@@ -94,7 +94,7 @@ const Activate = () => {
             </a>
 
             <a
-              href={`https://wa.me/256778999768?text=${encodeURIComponent(`Hi, I just paid the activation fee for Supercash.\n\nUsername: ${profile.username}\nEmail: ${profile.email}\n\nPlease activate my account.`)}`}
+              href={`https://wa.me/256778999768?text=${encodeURIComponent(`Hi, I just paid the activation fee for Smart Cash.\n\nUsername: ${profile.username}\nEmail: ${profile.email}\n\nPlease activate my account.`)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="block"
