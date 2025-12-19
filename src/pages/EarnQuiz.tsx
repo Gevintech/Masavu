@@ -1,28 +1,38 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase, Task } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { formatRemaining, useTaskCooldown } from '@/hooks/useTaskCooldown';
 import { ArrowLeft, HelpCircle, CheckCircle } from 'lucide-react';
 
 const EarnQuiz = () => {
   const { user, profile, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [completedTasks, setCompletedTasks] = useState<string[]>([]);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
+
+  const cooldown = useTaskCooldown({ userId: user?.id, taskType: 'quiz' });
 
   useEffect(() => {
     if (!user) {
       navigate('/login');
       return;
     }
-    fetchTasks();
-    fetchCompletedTasks();
+
+    setLoading(true);
+    Promise.all([
+      fetchTasks(),
+      cooldown.refresh().catch((e) => {
+        console.error(e);
+        toast({ title: 'Unable to load completed tasks', variant: 'destructive' });
+      }),
+    ]).finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchTasks = async () => {
@@ -31,38 +41,47 @@ const EarnQuiz = () => {
       .select('*')
       .eq('type', 'quiz')
       .eq('active', true);
-    
-    if (data) setTasks(data);
-    setLoading(false);
-  };
 
-  const fetchCompletedTasks = async () => {
-    if (!user) return;
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    
-    const { data } = await supabase
-      .from('completed_tasks')
-      .select('task_id')
-      .eq('user_id', user.id)
-      .eq('task_type', 'quiz')
-      .gte('created_at', twentyFourHoursAgo.toISOString());
-    
-    if (data) setCompletedTasks(data.map(t => t.task_id));
+    if (data) setTasks(data);
   };
 
   const submitAnswer = async (task: Task) => {
     if (!user || !profile) return;
-    
+
     const selectedAnswer = selectedAnswers[task.id];
     if (selectedAnswer === undefined) {
       toast({ title: 'Please select an answer', variant: 'destructive' });
       return;
     }
 
-    const isCorrect = selectedAnswer === task.correct_answer;
-    const reward = isCorrect ? task.reward : Math.floor(task.reward / 2);
-
     try {
+      // Server-side guard: prevent re-claim within last 24 hours
+      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const { data: recent, error: recentError } = await supabase
+        .from('completed_tasks')
+        .select('created_at')
+        .eq('user_id', user.id)
+        .eq('task_id', task.id)
+        .eq('task_type', 'quiz')
+        .gte('created_at', twentyFourHoursAgo.toISOString())
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (recentError) throw recentError;
+
+      if (recent && recent.length > 0) {
+        const remainingMs = Math.max(
+          0,
+          new Date(recent[0].created_at).getTime() + 24 * 60 * 60 * 1000 - Date.now()
+        );
+        toast({ title: `Available again in ${formatRemaining(remainingMs)}` });
+        await cooldown.refresh();
+        return;
+      }
+
+      const isCorrect = selectedAnswer === task.correct_answer;
+      const reward = isCorrect ? task.reward : Math.floor(task.reward / 2);
+
       await supabase.from('completed_tasks').insert({
         user_id: user.id,
         task_id: task.id,
@@ -74,9 +93,9 @@ const EarnQuiz = () => {
         .update({ wallet_quiz: profile.wallet_quiz + reward })
         .eq('id', user.id);
 
-      setCompletedTasks([...completedTasks, task.id]);
+      await cooldown.refresh();
       await refreshProfile();
-      
+
       if (isCorrect) {
         toast({ title: `Correct! +${task.reward} UGX earned!` });
       } else {
@@ -119,7 +138,9 @@ const EarnQuiz = () => {
           </div>
         ) : (
           tasks.map((task) => {
-            const isCompleted = completedTasks.includes(task.id);
+            const remainingMs = cooldown.getRemainingMs(task.id);
+            const isCompleted = remainingMs > 0;
+
             return (
               <div key={task.id} className="bg-card rounded-xl p-4">
                 <div className="flex justify-between items-start mb-2">
@@ -127,28 +148,31 @@ const EarnQuiz = () => {
                   <span className="text-sm font-bold text-primary">+{task.reward} UGX</span>
                 </div>
                 <p className="text-sm mb-3">{task.question}</p>
-                
+
                 {isCompleted ? (
                   <Button disabled className="w-full">
-                    <CheckCircle className="w-4 h-4 mr-2" /> Completed
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Available in {formatRemaining(remainingMs)}
                   </Button>
                 ) : (
                   <div className="space-y-2">
                     {task.options?.map((option, index) => (
                       <Button
                         key={index}
-                        variant={selectedAnswers[task.id] === index ? "default" : "outline"}
+                        variant={selectedAnswers[task.id] === index ? 'default' : 'outline'}
                         className="w-full justify-start"
                         onClick={() => setSelectedAnswers({ ...selectedAnswers, [task.id]: index })}
+                        disabled={cooldown.loading}
                       >
                         {option}
                       </Button>
                     ))}
-                    <Button 
-                      className="w-full gradient-primary mt-2" 
+                    <Button
+                      className="w-full gradient-primary mt-2"
                       onClick={() => submitAnswer(task)}
+                      disabled={cooldown.loading}
                     >
-                      Submit Answer
+                      {cooldown.loading ? 'Checking…' : 'Submit Answer'}
                     </Button>
                   </div>
                 )}
@@ -162,3 +186,4 @@ const EarnQuiz = () => {
 };
 
 export default EarnQuiz;
+

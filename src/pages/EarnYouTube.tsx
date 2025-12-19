@@ -1,27 +1,40 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase, Task } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { formatRemaining, useTaskCooldown } from '@/hooks/useTaskCooldown';
 import { ArrowLeft, Youtube, ExternalLink, CheckCircle } from 'lucide-react';
 
 const EarnYouTube = () => {
   const { user, profile, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [completedTasks, setCompletedTasks] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const cooldown = useTaskCooldown({ userId: user?.id, taskType: 'youtube' });
 
   useEffect(() => {
     if (!user) {
       navigate('/login');
       return;
     }
-    fetchTasks();
-    fetchCompletedTasks();
+
+    setLoading(true);
+    Promise.all([
+      fetchTasks(),
+      cooldown.refresh().catch((e) => {
+        console.error(e);
+        toast({
+          title: 'Unable to load completed tasks',
+          variant: 'destructive',
+        });
+      }),
+    ]).finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchTasks = async () => {
@@ -30,43 +43,50 @@ const EarnYouTube = () => {
       .select('*')
       .eq('type', 'youtube')
       .eq('active', true);
-    
-    if (data) setTasks(data);
-    setLoading(false);
-  };
 
-  const fetchCompletedTasks = async () => {
-    if (!user) return;
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    
-    const { data } = await supabase
-      .from('completed_tasks')
-      .select('task_id')
-      .eq('user_id', user.id)
-      .eq('task_type', 'youtube')
-      .gte('created_at', twentyFourHoursAgo.toISOString());
-    
-    if (data) setCompletedTasks(data.map(t => t.task_id));
+    if (data) setTasks(data);
   };
 
   const completeTask = async (task: Task) => {
     if (!user || !profile) return;
-    
+
     try {
-      // Insert completed task
+      // Server-side guard: prevent re-claim within last 24 hours (works even after refresh)
+      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const { data: recent, error: recentError } = await supabase
+        .from('completed_tasks')
+        .select('created_at')
+        .eq('user_id', user.id)
+        .eq('task_id', task.id)
+        .eq('task_type', 'youtube')
+        .gte('created_at', twentyFourHoursAgo.toISOString())
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (recentError) throw recentError;
+
+      if (recent && recent.length > 0) {
+        const remainingMs = Math.max(
+          0,
+          new Date(recent[0].created_at).getTime() + 24 * 60 * 60 * 1000 - Date.now()
+        );
+        toast({ title: `Available again in ${formatRemaining(remainingMs)}` });
+        await cooldown.refresh();
+        return;
+      }
+
       await supabase.from('completed_tasks').insert({
         user_id: user.id,
         task_id: task.id,
         task_type: 'youtube',
       });
 
-      // Update wallet
       await supabase
         .from('profiles')
         .update({ wallet_youtube: profile.wallet_youtube + task.reward })
         .eq('id', user.id);
 
-      setCompletedTasks([...completedTasks, task.id]);
+      await cooldown.refresh();
       await refreshProfile();
       toast({ title: `+${task.reward} UGX earned!` });
     } catch (error) {
@@ -106,7 +126,9 @@ const EarnYouTube = () => {
           </div>
         ) : (
           tasks.map((task) => {
-            const isCompleted = completedTasks.includes(task.id);
+            const remainingMs = cooldown.getRemainingMs(task.id);
+            const isCompleted = remainingMs > 0;
+
             return (
               <div key={task.id} className="bg-card rounded-xl p-4">
                 <div className="flex justify-between items-start mb-2">
@@ -114,10 +136,11 @@ const EarnYouTube = () => {
                   <span className="text-sm font-bold text-primary">+{task.reward} UGX</span>
                 </div>
                 <p className="text-sm text-muted-foreground mb-3">{task.description}</p>
-                
+
                 {isCompleted ? (
                   <Button disabled className="w-full">
-                    <CheckCircle className="w-4 h-4 mr-2" /> Completed
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Available in {formatRemaining(remainingMs)}
                   </Button>
                 ) : (
                   <div className="space-y-2">
@@ -128,11 +151,12 @@ const EarnYouTube = () => {
                         </Button>
                       </a>
                     )}
-                    <Button 
-                      className="w-full gradient-primary" 
+                    <Button
+                      className="w-full gradient-primary"
                       onClick={() => completeTask(task)}
+                      disabled={cooldown.loading}
                     >
-                      Claim Reward
+                      {cooldown.loading ? 'Checking…' : 'Claim Reward'}
                     </Button>
                   </div>
                 )}
@@ -146,3 +170,4 @@ const EarnYouTube = () => {
 };
 
 export default EarnYouTube;
+
