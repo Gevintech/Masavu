@@ -37,11 +37,15 @@ const EarnYouTube = () => {
 
   const fetchCompletedTasks = async () => {
     if (!user) return;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
     const { data } = await supabase
       .from('completed_tasks')
       .select('task_id')
       .eq('user_id', user.id)
-      .eq('task_type', 'youtube');
+      .eq('task_type', 'youtube')
+      .gte('created_at', today.toISOString());
     
     if (data) setCompletedTasks(data.map(t => t.task_id));
   };
