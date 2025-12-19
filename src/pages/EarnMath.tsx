@@ -43,14 +43,13 @@ const EarnMath = () => {
 
   const fetchCompletedTasks = async () => {
     if (!user) return;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     
     const { data } = await supabase
       .from('completed_tasks')
       .select('task_id')
       .eq('user_id', user.id)
-      .gte('created_at', today.toISOString());
+      .gte('created_at', twentyFourHoursAgo.toISOString());
     if (data) setCompletedTasks(data.map(ct => ct.task_id));
   };
 
