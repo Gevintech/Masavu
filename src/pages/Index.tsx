@@ -7,7 +7,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="p-4 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-primary">💰 Smart Cash</h1>
+        <h1 className="text-2xl font-bold text-primary">💰 Supercash</h1>
         <Link to="/login">
           <Button variant="outline" size="sm">Login</Button>
         </Link>
@@ -19,7 +19,7 @@ const Index = () => {
           Earn Money <span className="text-primary">Daily!</span>
         </h2>
         <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-          Watch videos, complete tasks, refer friends and earn real money with Smart Cash!
+          Watch videos, complete tasks, refer friends and earn real money with Supercash!
         </p>
         <Link to="/register">
           <Button size="lg" className="gradient-primary text-primary-foreground font-semibold px-8">
@@ -39,7 +39,7 @@ const Index = () => {
         <FeatureCard 
           icon={<Users className="w-8 h-8" />}
           title="Referral Bonus"
-          description="Get 2,000 UGX per referral"
+          description="Get 2500 UGX per referral"
           color="text-blue-400"
         />
         <FeatureCard 

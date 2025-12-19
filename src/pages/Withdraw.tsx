@@ -55,7 +55,7 @@ const Withdraw = () => {
   };
 
   const wallets = [
-    { key: 'referral', label: 'Referral', balance: profile?.wallet_referral || 0, minRequired: 10000 },
+    { key: 'referral', label: 'Referral', balance: profile?.wallet_referral || 0, minRequired: 0 },
     { key: 'youtube', label: 'YouTube', balance: profile?.wallet_youtube || 0, minRequired: MIN_WITHDRAWAL },
     { key: 'tiktok', label: 'TikTok', balance: profile?.wallet_tiktok || 0, minRequired: MIN_WITHDRAWAL },
     { key: 'quiz', label: 'Quiz', balance: profile?.wallet_quiz || 0, minRequired: MIN_WITHDRAWAL },

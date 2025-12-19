@@ -60,8 +60,8 @@ const Dashboard = () => {
   const shareReferralLink = () => {
     if (navigator.share) {
       navigator.share({
-        title: 'Join Smart Cash',
-        text: 'Earn money daily with Smart Cash! Use my referral link:',
+        title: 'Join Supercash',
+        text: 'Earn money daily with Supercash! Use my referral link:',
         url: profile.referral_link,
       });
     } else {
@@ -81,7 +81,7 @@ const Dashboard = () => {
         <div className="flex items-center gap-2">
           <NavigationDrawer onLogout={handleLogout} />
           <div>
-            <h1 className="text-xl font-bold">💰 Smart Cash</h1>
+            <h1 className="text-xl font-bold">💰 Supercash</h1>
             <p className="text-sm text-muted-foreground">Welcome, {profile.username}</p>
           </div>
         </div>
@@ -130,7 +130,7 @@ const Dashboard = () => {
             Referrals: <span className="text-primary">{profile.total_referrals}</span>
           </p>
           <Button className="w-full mt-3 gradient-gold text-accent-foreground" onClick={shareReferralLink}>
-            <Share2 className="w-4 h-4 mr-2" /> Share & Earn 2,000 UGX
+            <Share2 className="w-4 h-4 mr-2" /> Share & Earn 2,500 UGX
           </Button>
         </div>
       </div>

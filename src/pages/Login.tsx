@@ -49,7 +49,7 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-background p-4 flex items-center justify-center">
       <div className="w-full max-w-md">
-        <h1 className="text-2xl font-bold text-center mb-2">💰 Smart Cash</h1>
+        <h1 className="text-2xl font-bold text-center mb-2">💰 Supercash</h1>
         <p className="text-center text-muted-foreground mb-6">Login to your account</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">

@@ -6,39 +6,39 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 220 25% 15%;
+    --background: 180 25% 15%;
+    --foreground: 180 10% 95%;
 
-    --card: 220 15% 97%;
-    --card-foreground: 220 25% 15%;
+    --card: 180 20% 18%;
+    --card-foreground: 180 10% 95%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 25% 15%;
+    --popover: 180 20% 18%;
+    --popover-foreground: 180 10% 95%;
 
-    --primary: 220 70% 35%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 168 80% 45%;
+    --primary-foreground: 180 25% 10%;
 
-    --secondary: 220 15% 92%;
-    --secondary-foreground: 220 25% 15%;
+    --secondary: 180 15% 25%;
+    --secondary-foreground: 180 10% 95%;
 
-    --muted: 220 15% 95%;
-    --muted-foreground: 220 10% 45%;
+    --muted: 180 15% 22%;
+    --muted-foreground: 180 10% 65%;
 
-    --accent: 0 65% 45%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 45 100% 55%;
+    --accent-foreground: 180 25% 10%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 76% 36%;
+    --success: 142 76% 45%;
     --success-foreground: 0 0% 100%;
 
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 220 15% 88%;
-    --input: 220 15% 92%;
-    --ring: 220 70% 35%;
+    --border: 180 15% 28%;
+    --input: 180 15% 25%;
+    --ring: 168 80% 45%;
 
     --radius: 0.75rem;
 
@@ -47,7 +47,7 @@
     --quiz: 262 83% 58%;
     --daily: 142 76% 45%;
     --aviator: 38 92% 50%;
-    --loan: 220 70% 35%;
+    --loan: 199 89% 48%;
   }
 }
 
@@ -64,14 +64,14 @@
 
 @layer utilities {
   .gradient-primary {
-    background: linear-gradient(135deg, hsl(220 70% 35%) 0%, hsl(220 70% 25%) 100%);
+    background: linear-gradient(135deg, hsl(168 80% 45%) 0%, hsl(180 60% 35%) 100%);
   }
   
   .gradient-gold {
-    background: linear-gradient(135deg, hsl(0 65% 45%) 0%, hsl(0 65% 35%) 100%);
+    background: linear-gradient(135deg, hsl(45 100% 55%) 0%, hsl(38 92% 50%) 100%);
   }
   
   .card-glow {
-    box-shadow: 0 0 20px hsl(220 70% 35% / 0.15);
+    box-shadow: 0 0 20px hsl(168 80% 45% / 0.2);
   }
 }

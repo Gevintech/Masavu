@@ -56,7 +56,7 @@ const NavigationDrawer = ({ onLogout }: NavigationDrawerProps) => {
       </SheetTrigger>
       <SheetContent side="left" className="w-72">
         <SheetHeader>
-          <SheetTitle className="text-left">💰 Smart Cash</SheetTitle>
+          <SheetTitle className="text-left">💰 Supercash</SheetTitle>
         </SheetHeader>
         <nav className="mt-6 flex flex-col gap-1">
           {menuItems.map((item) => (
