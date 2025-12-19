@@ -52,12 +52,12 @@ const EarnTikTok = () => {
       const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
       const { data: recent, error: recentError } = await supabase
         .from('completed_tasks')
-        .select('created_at')
+        .select('completed_at')
         .eq('user_id', user.id)
         .eq('task_id', task.id)
         .eq('task_type', 'tiktok')
-        .gte('created_at', twentyFourHoursAgo.toISOString())
-        .order('created_at', { ascending: false })
+        .gte('completed_at', twentyFourHoursAgo.toISOString())
+        .order('completed_at', { ascending: false })
         .limit(1);
 
       if (recentError) throw recentError;
@@ -65,7 +65,7 @@ const EarnTikTok = () => {
       if (recent && recent.length > 0) {
         const remainingMs = Math.max(
           0,
-          new Date(recent[0].created_at).getTime() + 24 * 60 * 60 * 1000 - Date.now()
+          new Date(recent[0].completed_at).getTime() + 24 * 60 * 60 * 1000 - Date.now()
         );
         toast({ title: `Available again in ${formatRemaining(remainingMs)}` });
         await cooldown.refresh();
@@ -76,6 +76,7 @@ const EarnTikTok = () => {
         user_id: user.id,
         task_id: task.id,
         task_type: 'tiktok',
+        completed_at: new Date().toISOString(),
       });
 
       await supabase
