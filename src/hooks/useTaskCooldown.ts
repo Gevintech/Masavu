@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 
 type CompletedRow = {
   task_id: string;
-  created_at: string;
+  completed_at: string;
 };
 
 const DEFAULT_COOLDOWN_MS = 24 * 60 * 60 * 1000;
@@ -43,10 +43,10 @@ export function useTaskCooldown(params: {
 
     let query = supabase
       .from("completed_tasks")
-      .select("task_id, created_at")
+      .select("task_id, completed_at")
       .eq("user_id", userId)
-      .gte("created_at", since.toISOString())
-      .order("created_at", { ascending: false });
+      .gte("completed_at", since.toISOString())
+      .order("completed_at", { ascending: false });
 
     if (taskType) query = query.eq("task_type", taskType);
 
@@ -57,7 +57,7 @@ export function useTaskCooldown(params: {
 
     const map: Record<string, string> = {};
     (data as CompletedRow[] | null)?.forEach((row) => {
-      if (!map[row.task_id]) map[row.task_id] = row.created_at;
+      if (!map[row.task_id]) map[row.task_id] = row.completed_at;
     });
 
     setCompletedAtByTaskId(map);
